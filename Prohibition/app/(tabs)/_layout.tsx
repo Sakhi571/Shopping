@@ -49,7 +49,7 @@ const TabLayout = () => {
           },
         })}
       >
-        <Tab.Screen
+         <Tab.Screen
           name="Home"
           component={Home}
           options={{
@@ -64,7 +64,7 @@ const TabLayout = () => {
             tabBarButton: () => null,
             tabBarStyle: { display: 'none' },
           }}
-        />
+        /> 
         <Tab.Screen name="new" component={NewScreen} />
         <Tab.Screen name="add" component={AddItem} />
         <Tab.Screen
