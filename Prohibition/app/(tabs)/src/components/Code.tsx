@@ -1,66 +1,45 @@
-import { View, Text, StyleSheet, TextInput, Dimensions, TouchableOpacity } from 'react-native';
+import { useNavigation } from 'expo-router';
 import React, { useState, useRef } from 'react';
-import Toast from 'react-native-simple-toast';
-import { useNavigation } from '@react-navigation/native';
-
-const { width, height } = Dimensions.get('window');
-const GLOBAL_OTP = '4708';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import OTPTextView from 'react-native-otp-textinput';
 
 const Code = () => {
-  const navigation = useNavigation();
-  const [otp, setOtp] = useState(['', '', '', '']);
-  const otpInputs = useRef([]);
+  const [otp, setOtp] = useState('');
+  const otpInput = useRef(null);
 
-  const handleChange = (text, index) => {
-    const newOtp = [...otp];
-    newOtp[index] = text;
-    setOtp(newOtp);
+  //Global OTP variable
+  const globalOTPVariable= '4708';
 
-  
-    if (text && index < otp.length - 1) {
-      otpInputs.current[index + 1].focus();
-    }
+  //Navigation variable
+  const naviagtion = useNavigation();
+
+  const handleOtpChange = (otp) => {
+    setOtp(otp);
   };
 
-  const handleKeyPress = (e, index) => {
-    if (e.nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
-      otpInputs.current[index - 1].focus();
-    }
-  };
-
-  const checkOtp = () => {
-    const enteredOtp = otp.join('');
-    if (enteredOtp === GLOBAL_OTP) {
-      Toast.showWithGravity('OTP Verified!', Toast.LONG, Toast.TOP);
-      navigation.navigate('new');
-    } else {
-      Toast.showWithGravity('Incorrect OTP. Please try again.', Toast.LONG, Toast.TOP);
-    }
+  const handleVerify = () => {
+     if (otp === globalOTPVariable) {
+      naviagtion.navigate('new')
+      alert('OTP Verified!');
+     }
+   else {
+    alert('Please enter valid OTP')
+   }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.txt}>Verification Code</Text>
-      <View style={styles.otpContainer}>
-        {otp.map((value, index) => (
-          <TextInput
-            key={index}
-            style={styles.otpBox}
-            keyboardType="number-pad"
-            maxLength={1}
-            value={value}
-            onChangeText={(text) => handleChange(text, index)}
-            onKeyPress={(e) => handleKeyPress(e, index)}
-            ref={(input) => (otpInputs.current[index] = input)}
-          />
-        ))}
-      </View>
-      <View style={styles.message}>
-        <Text style={styles.txt1}>Check the SMS</Text>
-        <Text style={styles.txt1}>message to get verification code</Text>
-      </View>
-      <TouchableOpacity style={styles.btn} onPress={checkOtp}>
-        <Text style={styles.txtBtn}>Continue</Text>
+      <Text style={styles.title}>Enter Verification Code</Text>
+      <OTPTextView
+        containerStyle={styles.otpContainer}
+        handleTextChange={handleOtpChange}
+        textInputStyle={styles.otpInput}
+        inputCount={4}
+        keyboardType="numeric"
+        ref={otpInput}
+      />
+      <TouchableOpacity style={styles.verifyButton} onPress={handleVerify}>
+        <Text style={styles.verifyButtonText}>Verify OTP</Text>
       </TouchableOpacity>
     </View>
   );
@@ -70,45 +49,39 @@ export default Code;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: width * 0.05,
+    paddingHorizontal: 20,
   },
-  txt: {
+  title: {
     fontSize: 20,
-    marginBottom: height * 0.02,
+    marginBottom: 20,
   },
   otpContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     width: '80%',
+    marginTop: 20,
   },
-  otpBox: {
+  otpInput: {
+    width: 50,
+    height: 50,
     borderWidth: 1,
-    borderColor: '#000',
     borderRadius: 5,
-    width: '20%',
-    height: height * 0.07,
+    fontSize: 20,
     textAlign: 'center',
-    fontSize: 18,
   },
-  txt1: {
-    alignSelf: 'center',
+  verifyButton: {
+    marginTop: 30,
+    backgroundColor: 'blue',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 10,
   },
-  message: {
-    marginTop: height * 0.02,
-  },
-  btn: {
-    marginTop: height * 0.07,
-    backgroundColor: 'red',
-    width: width * 0.3,
-    height: height * 0.06,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  txtBtn: {
+  verifyButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
+    textAlign: 'center',
   },
 });

@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-const {height, width} = Dimensions.get('window');
+const {height} = Dimensions.get('window');
 const Card = () => {
   const navigation = useNavigation();
   const [isFocused, setIsFocused] = useState(false);
@@ -12,22 +12,22 @@ const Card = () => {
   const [error, setError] = useState('');
 
 
-
+  
   const toggleCheckbox = () => {
     setIsChecked(!isChecked);
   };
 
-  const validateEmail = (email) => {
+  const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@gmail\.com$/;
     return regex.test(email);
   };
 
-  const validateName = (name) =>{
+  const validateName = (name: string) =>{
     const  regex=  /^[a-zA-Z\s]+$/;
     return regex.test(name)&& name.trim().length > 0;
   }
 
-  const validatePassword = (password) => {
+  const validatePassword = (password: string) => {
     const regex = /^[a-zA-Z0-1\s]+$/;
     return regex.test(password)&& password.trim().length > 0;
   }

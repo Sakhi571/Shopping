@@ -4,14 +4,14 @@ import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import Toast from 'react-native-simple-toast';
 import { useSelector, useDispatch } from 'react-redux';
-import { addCard, removeCard } from '../redux/Slice';
+import { addCard, removeAll, removeCard, removeItem } from '../redux/Slice';
 
 const { width, height } = Dimensions.get('window');
 
 const AddItem = () => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
-    const [checkedId, setCheckedId] = useState(null);
+    const [checkedId, setCheckedId] = useState([]);
     const items = useSelector(state => state.cart);
     const [total, setTotal] = useState(0); 
 
@@ -23,10 +23,34 @@ const AddItem = () => {
         calculateTotal();
     }, [items]);
 
-   
+   //Function for delete selected items
+   const deleteSelectedItems=()=>{
+        if (checkedId.length === items.length) {
+            dispatch(removeAll());
+        }
+        else{
+           checkedId.forEach(id => {
+                dispatch(removeItem({id}));
+            })
+        }
+        setCheckedId([]);
+   };
+
+   //For all select
+
+   const toggleSelectAll=()=>{
+    if (checkedId.length === items.length){
+        setCheckedId([]);
+    }
+    else {
+        setCheckedId(items.map(item => item.id))
+    }
+   }
+
+
 
     const toggleCheckbox = (id) => {
-        setCheckedId(checkedId === id ? null : id);
+        setCheckedId(prev => prev.includes(id) ? prev.filter(select =>select !== id) : [...prev, id]);
     };
 
     const incrementItemQuantity = (item) => {
@@ -68,6 +92,14 @@ const AddItem = () => {
                 <View style={styles.total}>
                     <Text style={styles.txxt}>Total: ${total}</Text>
                 </View>
+                <TouchableOpacity style={styles.deleteButton} onPress={deleteSelectedItems}>
+                    <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={toggleSelectAll} style={styles.selectAllItems}>
+                    <Text style={styles.selectAllItemsText}>
+                        Select All
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <FlatList
@@ -76,10 +108,10 @@ const AddItem = () => {
                 renderItem={({ item }) => (
                     <View style={styles.itemContainer}>
                         <TouchableOpacity
-                            style={[styles.checkbox, checkedId === item.id && styles.checked]}
+                            style={[styles.checkbox, checkedId.includes(item.id) && styles.checked]}
                             onPress={() => toggleCheckbox(item.id)}
                         >
-                            {checkedId === item.id && (
+                            {checkedId.includes(item.id) && (
                                 <View style={styles.checkmark}>
                                     <Text style={styles.checkmarkIcon}>✓</Text>
                                 </View>
@@ -140,17 +172,19 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: 50,
     },
     total: {
-        marginLeft: width * 0.2,
+        marginLeft: width * 0.13,
         paddingTop: height * 0.03,
     },
     txxt: {
         fontSize: 25,
     },
     checkboxContainer: {
+        display:"flex",
         flexDirection: 'row',
         paddingHorizontal: width * 0.05,
         paddingTop: height * 0.20,
         alignItems: 'center',
+        justifyContent:"space-between"
     },
     checkbox: {
         width: 20,
@@ -214,4 +248,31 @@ const styles = StyleSheet.create({
     quantityText: {
         fontSize: 18,
     },
+    deleteButton:
+    {
+        marginTop: height * 0.035,
+        backgroundColor:"red",
+        width: width * 0.2,
+        height: height * 0.03,
+        borderRadius: 10,
+        marginLeft: width * 0.01
+    },
+    deleteButtonText:{
+        alignSelf:"center",
+        marginTop: height * 0.003,
+        color:"white",
+    },
+    selectAllItems:{
+        marginTop: height * 0.035,
+        width: width * 0.2,
+        height: height * 0.03,
+        borderRadius: 10,
+        backgroundColor:'blue',
+        marginLeft: width * 0.03
+    },
+    selectAllItemsText:{
+        alignSelf:"center",
+        marginTop: height * 0.003,
+        color:"white",
+    }
 });

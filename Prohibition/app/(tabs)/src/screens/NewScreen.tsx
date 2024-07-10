@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, FlatList, Image, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import Toast from 'react-native-simple-toast';
-import { addItem } from '../redux/Slice';
+import { addCard,addItem, removeCard } from '../redux/Slice';
 
 
 const { width, height } = Dimensions.get('window');
@@ -12,9 +12,11 @@ const { width, height } = Dimensions.get('window');
 const NewScreen = () => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
+    const [expandItem, setexpandItem] = useState(null);
 
     // for accessing the length of added items
     const selectItem = useSelector(state => state.cart) ;
+    console.log(selectItem);
 
     const add=(item)=>{
       if(selectItem.length < 5)
@@ -31,6 +33,44 @@ const NewScreen = () => {
       
       }
     }
+
+  const incrementQunatity  = (item) => {
+    dispatch(addCard(item));
+  };
+
+  const decrementQuantity=(item)=>{
+   
+    dispatch(removeCard(item));
+  }
+
+
+  // Function for renderItemButton
+  const renderItemButtom=(item)=>{
+    const items= selectItem.findIndex(cardItem => cardItem.id === item.id);
+    if(items === -1 || expandItem !== item.id){
+        return(
+             <TouchableOpacity style={styles.addButton} onPress={()=> {add(item); setexpandItem(item.id);}}>
+                <Text style={styles.addButtonText}>Add</Text>
+              </TouchableOpacity>
+        );  
+  }
+  else{
+    const updateItem= selectItem[items];
+    return( 
+         <View style={styles.quantityContainer}>
+          <TouchableOpacity style={styles.minusButton} onPress={()=> decrementQuantity(item)} disabled={updateItem.quantity === 1} >
+            <Text style={styles.quantityText}>-</Text>
+          </TouchableOpacity>
+           <Text style={styles.quantityText}>{updateItem.quantity}</Text>
+          <TouchableOpacity style={styles.plusButton} onPress={()=> incrementQunatity(item)}>
+            <Text style={styles.quantityText}>+</Text>
+          </TouchableOpacity>
+        </View>
+     
+    )
+  }
+}
+
 
   const raw = [
     { id: 1, image: require('../images/1.png'), name: 'Sneakers', price:'579', dollar: 79, quantity: 1 },
@@ -60,23 +100,19 @@ const NewScreen = () => {
 
       <FlatList
         data={raw}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.id.toString()}
         numColumns={2}
         contentContainerStyle={styles.flatListContent}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.flat} >
             <View style={styles.itemContainer}>
               <Image source={item.image} style={styles.image} />
-              <Text style={styles.itemText}>{item.name}</Text>
-              <TouchableOpacity style={styles.addButton} onPress={()=> add(item)}>
-                <Text style={styles.addButtonText}>Add</Text>
-              </TouchableOpacity>
+              <Text style={styles.itemText}>{item.name}</Text>     
+             {renderItemButtom(item)}
             </View>
           </TouchableOpacity>
         )}
       />
-
-    
 
     </View>
   );
@@ -155,4 +191,32 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: width * 0.04,
   },
+
+
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: height * 0.01,
+  },
+  minusButton: {
+    backgroundColor: 'red',
+    paddingHorizontal: width * 0.03,
+    paddingVertical: height * 0.01,
+    borderRadius: 5,
+    marginRight: width * 0.02,
+  },
+  plusButton: {
+    backgroundColor: 'blue',
+    paddingHorizontal: width * 0.03,
+    paddingVertical: height * 0.01,
+    borderRadius: 5,
+    marginLeft: width * 0.02,
+  },
+  quantityText: {
+    fontSize: width * 0.04,
+    color: 'black',
+  },
+  txtt:{
+    fontSize:30
+  }
 });
